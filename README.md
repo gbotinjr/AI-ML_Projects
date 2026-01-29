@@ -1,1 +1,1 @@
-# AI - ML // Projects
+Artifial Intelligence and Machine Learning Project Repository
