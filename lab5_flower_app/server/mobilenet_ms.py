@@ -13,6 +13,7 @@ def _make_divisible(v, divisor, min_value=None):
     return new_v
 
 class GlobalAvgPooling(nn.Cell):
+
     def __init__(self):
         super(GlobalAvgPooling, self).__init__()
         self.mean = ops.ReduceMean(keep_dims=False)
@@ -22,6 +23,7 @@ class GlobalAvgPooling(nn.Cell):
         return x
 
 class ConvBNReLU(nn.Cell):
+
     def __init__(self, in_planes, out_planes, kernel_size=3, stride=1, groups=1):
         super(ConvBNReLU, self).__init__()
         padding = (kernel_size - 1) // 2
@@ -33,26 +35,33 @@ class ConvBNReLU(nn.Cell):
             out_channels = in_planes
             conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, pad_mode='pad',
                              padding=padding, group=in_channels)
+
         layers = [conv, nn.BatchNorm2d(out_planes), nn.ReLU6()]
         self.features = nn.SequentialCell(layers)
 
     def construct(self, x):
-        return self.features(x)
+        output = self.features(x)
+        return output
 
 class InvertedResidual(nn.Cell):
+
     def __init__(self, inp, oup, stride, expand_ratio):
         super(InvertedResidual, self).__init__()
         assert stride in [1, 2]
+
         hidden_dim = int(round(inp * expand_ratio))
         self.use_res_connect = stride == 1 and inp == oup
+
         layers = []
         if expand_ratio != 1:
             layers.append(ConvBNReLU(inp, hidden_dim, kernel_size=1))
         layers.extend([
             # dw
-            ConvBNReLU(hidden_dim, hidden_dim, stride=stride, groups=hidden_dim),
+            ConvBNReLU(hidden_dim, hidden_dim,
+                       stride=stride, groups=hidden_dim),
             # pw-linear
-            nn.Conv2d(hidden_dim, oup, kernel_size=1, stride=1, has_bias=False),
+            nn.Conv2d(hidden_dim, oup, kernel_size=1,
+                      stride=1, has_bias=False),
             nn.BatchNorm2d(oup),
         ])
         self.conv = nn.SequentialCell(layers)
@@ -67,11 +76,11 @@ class InvertedResidual(nn.Cell):
         return x
 
 class MobileNetV2Backbone(nn.Cell):
+
     def __init__(self, width_mult=1., inverted_residual_setting=None, round_nearest=8,
                  input_channel=32, last_channel=1280):
         super(MobileNetV2Backbone, self).__init__()
         block = InvertedResidual
-
         # setting of inverted residual blocks
         self.cfgs = inverted_residual_setting
         if inverted_residual_setting is None:
@@ -90,7 +99,6 @@ class MobileNetV2Backbone(nn.Cell):
         input_channel = _make_divisible(input_channel * width_mult, round_nearest)
         self.out_channels = _make_divisible(last_channel * max(1.0, width_mult), round_nearest)
         features = [ConvBNReLU(3, input_channel, stride=2)]
-
         # building inverted residual blocks
         for t, c, n, s in self.cfgs:
             output_channel = _make_divisible(c * width_mult, round_nearest)
@@ -98,37 +106,45 @@ class MobileNetV2Backbone(nn.Cell):
                 stride = s if i == 0 else 1
                 features.append(block(input_channel, output_channel, stride, expand_ratio=t))
                 input_channel = output_channel
-
         # building last several layers
         features.append(ConvBNReLU(input_channel, self.out_channels, kernel_size=1))
+        # make it nn.CellList
         self.features = nn.SequentialCell(features)
         self._initialize_weights()
 
     def construct(self, x):
-        return self.features(x)
+        x = self.features(x)
+        return x
 
     def _initialize_weights(self):
+
         self.init_parameters_data()
         for _, m in self.cells_and_names():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
                 m.weight.set_data(ms.Tensor(np.random.normal(0, np.sqrt(2. / n),
                                                              m.weight.data.shape).astype("float32")))
+
                 if m.bias is not None:
-                    m.bias.set_data(ms.numpy.zeros(m.bias.data.shape, dtype="float32"))
+                    m.bias.set_data(
+                        ms.numpy.zeros(m.bias.data.shape, dtype="float32"))
             elif isinstance(m, nn.BatchNorm2d):
-                m.gamma.set_data(ms.Tensor(np.ones(m.gamma.data.shape, dtype="float32")))
-                m.beta.set_data(ms.numpy.zeros(m.beta.data.shape, dtype="float32"))
+                m.gamma.set_data(
+                    ms.Tensor(np.ones(m.gamma.data.shape, dtype="float32")))
+                m.beta.set_data(
+                    ms.numpy.zeros(m.beta.data.shape, dtype="float32"))
 
     @property
     def get_features(self):
         return self.features
 
 class MobileNetV2Head(nn.Cell):
+
     def __init__(self, input_channel=1280, num_classes=1000, has_dropout=False, activation="None"):
         super(MobileNetV2Head, self).__init__()
         # mobilenet head
-        head = [GlobalAvgPooling()] if not has_dropout else [GlobalAvgPooling(), nn.Dropout(0.2)]
+        head = ([GlobalAvgPooling()] if not has_dropout else
+                [GlobalAvgPooling(), nn.Dropout(0.2)])
         self.head = nn.SequentialCell(head)
         self.dense = nn.Dense(input_channel, num_classes, has_bias=True)
         self.need_activation = True
@@ -148,14 +164,18 @@ class MobileNetV2Head(nn.Cell):
         return x
 
     def _initialize_weights(self):
+
         self.init_parameters_data()
         for _, m in self.cells_and_names():
             if isinstance(m, nn.Dense):
-                m.weight.set_data(ms.Tensor(np.random.normal(0, 0.01, m.weight.data.shape).astype("float32")))
+                m.weight.set_data(ms.Tensor(np.random.normal(
+                    0, 0.01, m.weight.data.shape).astype("float32")))
                 if m.bias is not None:
-                    m.bias.set_data(ms.numpy.zeros(m.bias.data.shape, dtype="float32"))
+                    m.bias.set_data(
+                        ms.numpy.zeros(m.bias.data.shape, dtype="float32"))
 
 class MobileNetV2Combine(nn.Cell):
+
     def __init__(self, backbone, head):
         super(MobileNetV2Combine, self).__init__(auto_prefix=False)
         self.backbone = backbone
@@ -168,5 +188,5 @@ class MobileNetV2Combine(nn.Cell):
 
 def mobilenet_v2(num_classes):
     backbone_net = MobileNetV2Backbone()
-    head_net = MobileNetV2Head(backbone_net.out_channels, num_classes)
+    head_net = MobileNetV2Head(backbone_net.out_channels,num_classes)
     return MobileNetV2Combine(backbone_net, head_net)

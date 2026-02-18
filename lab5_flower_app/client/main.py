@@ -6,6 +6,7 @@ import json
 from PIL import Image
 import io
 import re
+import tempfile
 
 def main(page: ft.Page):
     page.title = "Flower Classification"
@@ -15,12 +16,10 @@ def main(page: ft.Page):
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.horizontal_alignment = ft.MainAxisAlignment.CENTER
 
-    image_holder = ft.Image(visible=False)
+    image_holder = ft.Image(src="https://flet.dev/img/logo.svg", visible=False, width=250, height=250)
     result_text = ft.Text()
 
-    import tempfile
-
-    def handle_loaded_file(e: ft.FilePickerResultEvent):
+    def handle_loaded_file(e):
         if e.files and len(e.files):
             with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
                 with open(e.files[0].path, "rb") as image_file:
@@ -38,8 +37,10 @@ def main(page: ft.Page):
             img.save(byte_io, 'PNG')
             byte_io.seek(0)
             image_bytes = byte_io.read()
+            image_data = base64.b64encode(image_bytes).decode("utf-8")
 
-    filepick = ft.FilePicker(on_result=handle_loaded_file)
+    filepick = ft.FilePicker()
+    filepick.on_result = handle_loaded_file
     page.overlay.append(filepick)
 
     def predict_image(e):
@@ -85,9 +86,9 @@ def main(page: ft.Page):
                 content=image_holder,
                 margin=10,
                 padding=10,
-                border=ft.border.all(5, ft.colors.BLACK),
-                alignment=ft.alignment.center,
-                bgcolor=ft.colors.WHITE,
+                border=ft.border.all(5, ft.Colors.BLACK),
+                alignment=ft.Alignment.CENTER,
+                bgcolor=ft.Colors.WHITE,
                 width=250,
                 height=250,
                 border_radius=10,
@@ -99,18 +100,18 @@ def main(page: ft.Page):
             ),
             ft.Container(
                 content=ft.Image(
-                    src=f"arrowtotheright.png",
+                    src="arrowtotheright.png",
                     height=160,
-                    fit=ft.ImageFit.CONTAIN,
+                    fit=ft.image,
                 )
             ),
             ft.Container(
                 content=result_text,
                 margin=10,
                 padding=10,
-                border=ft.border.all(5, ft.colors.BLACK),
-                alignment=ft.alignment.center,
-                bgcolor=ft.colors.WHITE,
+                border=ft.border.all(5, ft.Colors.BLACK),
+                alignment=ft.Alignment.CENTER,
+                bgcolor=ft.Colors.WHITE,
                 width=300,
                 height=125,
                 border_radius=10,
@@ -120,19 +121,14 @@ def main(page: ft.Page):
     )
 
     predict_button = ft.Container(
-        ft.ElevatedButton(
-            text="Predict",
-            width=150,
-            height=50,
-            on_click=predict_image
+            ft.Button(content="Predict", width=150, height=50, on_click=predict_image),
+            alignment=ft.Alignment.CENTER,
         ),
-        alignment=ft.alignment.center,
-    )
-
+        
     page.add(
         result_text,
         selected_image,
         predict_button
     )
 
-ft.app(target=main)
+ft.run(main)
