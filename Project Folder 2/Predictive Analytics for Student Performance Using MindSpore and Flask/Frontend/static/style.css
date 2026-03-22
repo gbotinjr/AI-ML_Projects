@@ -1,0 +1,28 @@
+/* Replace your current :root variables in the <style> section with these */
+:root {
+    --mapua-red: #8A1538; /* Classic Cardinal Red */
+    --mapua-gold: #FFC72C; /* Mapúa Gold */
+    --bg-color: #f8f9fa;
+    --sidebar-bg: #8A1538; /* Changes the whole sidebar to Cardinal Red */
+    --text-dark: #212529;
+    --text-light: #ffffff;
+}
+
+/* Update the button to use the new colors */
+.btn-primary {
+    background-color: var(--mapua-gold);
+    color: var(--text-dark); /* Dark text on gold button for readability */
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #e6b422; /* A slightly darker gold when hovering */
+}
