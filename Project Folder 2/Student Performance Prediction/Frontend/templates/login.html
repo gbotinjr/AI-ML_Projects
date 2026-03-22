@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Mapúa SPPS</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #8A1538 0%, #4a0b1e 100%); /* Deep Mapúa Red Gradient */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* Entrance animation for the whole card */
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        /* Endless floating animation for the icon */
+        .logo-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        h2 { color: #8A1538; margin: 0 0 5px; font-weight: 800; font-size: 1.8rem; }
+        p.subtitle { color: #666; font-size: 0.95rem; margin-bottom: 30px; }
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+        /* Glowing effect when typing */
+        .input-group input:focus {
+            border-color: #8A1538;
+            outline: none;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(138, 21, 56, 0.1);
+        }
+        /* Interactive 3D Button */
+        .btn-action {
+            background: #FFC72C; /* Mapúa Gold */
+            color: #1a202c;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 25px;
+        }
+        .btn-action:hover {
+            background: #f5b700;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 199, 44, 0.4);
+        }
+        .btn-action:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(255, 199, 44, 0.4);
+        }
+        /* Links */
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .links a {
+            color: #8A1538;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .links a:hover { color: #FFC72C; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo-icon">🦅</div>
+        <h2>Welcome Back!</h2>
+        <p class="subtitle">Student Performance System</p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                    <div style="margin-bottom: 20px; padding: 12px; background-color: #fee2e2; border-radius: 6px; text-align: center; border: 1px solid #ef4444;">
+                        <span style="color: #b91c1c; font-weight: 600; font-size: 0.9rem;">⚠️ {{ message }}</span>
+                    </div>
+                    {% elif category == 'success' %}
+                    <div style="margin-bottom: 20px; padding: 12px; background-color: #ecfdf5; border-radius: 6px; text-align: center; border: 1px solid #10b981;">
+                        <span style="color: #047857; font-weight: 600; font-size: 0.9rem;">✅ {{ message }}</span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn-action">Secure Login</button>
+        </form>
+        
+        <div class="links">
+            <a href="#">Forgot Password?</a>
+            <a href="/register">Create an Account!</a>
+        </div>
+    </div>
+</body>
+</html>
