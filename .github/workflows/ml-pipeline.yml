@@ -22,12 +22,12 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt || pip install scikit-learn pytest dvc
 
-      - name: Run Automated Unit Tests
+      - name: Train Model
         run: |
           source venv/bin/activate
           pytest tests/ -v
 
-      - name: Train Model
+      - name: Run Automated Unit Tests
         run: |
           source venv/bin/activate
           python train.py --output model.pkl
