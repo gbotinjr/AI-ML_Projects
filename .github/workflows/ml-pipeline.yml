@@ -42,5 +42,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
           git add model.pkl.dvc .gitignore
-          git commit -m "CI: Auto-version model artifact [skip ci]"
-          git push || echo "No changes to push"
+          git diff --cached --quiet || git commit -m "CI: Auto-version model artifact [skip ci]"
+          git push
