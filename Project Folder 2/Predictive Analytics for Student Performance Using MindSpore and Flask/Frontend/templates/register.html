@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Mapúa SPPS</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #8A1538 0%, #4a0b1e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .register-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        h2 { color: #8A1538; margin: 0 0 25px; font-weight: 800; font-size: 1.8rem; }
+        
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+            color: #333;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: #8A1538;
+            outline: none;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(138, 21, 56, 0.1);
+        }
+        .btn-action {
+            background: #FFC72C; 
+            color: #1a202c;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+            margin-bottom: 25px;
+        }
+        .btn-action:hover {
+            background: #f5b700;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 199, 44, 0.4);
+        }
+        .btn-action:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 5px rgba(255, 199, 44, 0.4);
+        }
+        .links a {
+            color: #8A1538;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .links a:hover { color: #FFC72C; }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <h2>Create an Account</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'error' %}
+                    <div style="margin-bottom: 20px; padding: 12px; background-color: #fee2e2; border-radius: 6px; text-align: center; border: 1px solid #ef4444;">
+                        <span style="color: #b91c1c; font-weight: 600; font-size: 0.9rem;">⚠️ {{ message }}</span>
+                    </div>
+                    {% elif category == 'success' %}
+                    <div style="margin-bottom: 20px; padding: 12px; background-color: #ecfdf5; border-radius: 6px; text-align: center; border: 1px solid #10b981;">
+                        <span style="color: #047857; font-weight: 600; font-size: 0.9rem;">✅ {{ message }}</span>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form action="/register" method="POST">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Choose a Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Choose a Password" required>
+            </div>
+            
+            <div class="input-group">
+                <label for="role">Select Role:</label>
+                <select name="role" id="role">
+                    <option value="Instructor">Instructor</option>
+                    <option value="Administrator">Administrator</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-action">Sign Up</button>
+        </form>
+        
+        <div class="links">
+            <a href="/">Already have an account? Login!</a>
+        </div>
+    </div>
+</body>
+</html>
