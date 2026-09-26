@@ -1,0 +1,48 @@
+
+
+name: Local Cloud ML CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-test-and-version:
+    # Routes the job to your local Linux VM
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python Environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt || pip install scikit-learn pytest dvc
+
+      - name: Run Automated Unit Tests
+        run: |
+          source venv/bin/activate
+          pytest tests/ -v
+
+      - name: Train Model
+        run: |
+          source venv/bin/activate
+          python train.py --output model.pkl
+
+      - name: Validate Model Artifact
+        run: |
+          source venv/bin/activate
+          pytest tests/test_model.py -v
+
+      - name: Version Model with DVC
+        run: |
+          source venv/bin/activate
+          dvc add model.pkl
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+          git add model.pkl.dvc .gitignore
+          git commit -m "CI: Auto-version model artifact [skip ci]"
+          git push || echo "No changes to push"
