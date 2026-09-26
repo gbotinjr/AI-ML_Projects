@@ -1,5 +1,3 @@
-
-
 name: Local Cloud ML CI/CD Pipeline
 
 on:
@@ -8,7 +6,6 @@ on:
 
 jobs:
   build-test-and-version:
-    # Routes the job to your local Linux VM
     runs-on: [self-hosted, linux]
 
     steps:
@@ -25,12 +22,12 @@ jobs:
       - name: Train Model
         run: |
           source venv/bin/activate
-          pytest tests/ -v
+          python train.py --output model.pkl
 
       - name: Run Automated Unit Tests
         run: |
           source venv/bin/activate
-          python train.py --output model.pkl
+          pytest tests/ -v
 
       - name: Validate Model Artifact
         run: |
